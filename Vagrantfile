@@ -1,37 +1,48 @@
-if Vagrant::VERSION < "2.0.0"
-  $stderr.puts "Must redirect to new repository for old Vagrant versions"
-  Vagrant::DEFAULT_SERVER_URL.replace('https://vagrantcloud.com')
-end
+NUM_WORKER_NODES=3
+IP_NW="10.0.0."
+IP_START=10
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "generic/centos8"
-  config.vm.box_check_update = false
+  config.vm.provision "shell", env: {"IP_NW" => IP_NW, "IP_START" => IP_START}, inline: <<-SHELL
+      apt-get update -y
+      echo "$IP_NW$((IP_START)) master-node" >> /etc/hosts
+      echo "$IP_NW$((IP_START+1)) worker-node01" >> /etc/hosts
+      echo "$IP_NW$((IP_START+2)) worker-node02" >> /etc/hosts
+      echo "$IP_NW$((IP_START+3)) worker-node03" >> /etc/hosts
+  SHELL
+
   config.vm.synced_folder "shared/", "/shared", create: true
   config.vm.synced_folder "data/", "/data", create: true
   config.vm.provision "shell", path: "swap.off.sh"
   config.vm.provision "shell", path: "add-fw-rules.sh"
+  config.vm.box = "bento/ubuntu-22.04"
+  config.vm.box_check_update = true
+  config.vm.boot_timeout = 600
 
-  config.vm.define "m1" do |server|
-    server.vm.provider "virtualbox" do |vb|
-      vb.customize ["modifyvm", :id, "--cpus", "2"]
-      vb.customize ['modifyvm', :id, '--macaddress1', '080027000051']
-      vb.customize ['modifyvm', :id, '--natnet1', '10.0.51.0/24']
-      vb.name = "m1"
-      vb.memory = 4096
+  config.vm.define "master" do |master|
+    # master.vm.box = "bento/ubuntu-18.04"
+    master.vm.hostname = "master-node"
+    master.vm.network "private_network", ip: IP_NW + "#{IP_START}"
+    master.vm.provider "virtualbox" do |vb|
+        vb.memory = 4048
+        vb.cpus = 2
     end
-    server.vm.hostname = "m1.aerospike.training"
-    server.vm.network :private_network, ip: "192.168.56.151"
+    #master.vm.provision "shell", path: "scripts/common.sh"
+    #master.vm.provision "shell", path: "scripts/master.sh"
   end
 
-  config.vm.define "m2" do |server|
-    server.vm.provider "virtualbox" do |vb|
-      vb.customize ["modifyvm", :id, "--cpus", "2"]
-      vb.customize ['modifyvm', :id, '--macaddress1', '080027000052']
-      vb.customize ['modifyvm', :id, '--natnet1', '10.0.52.0/24']
-      vb.name = "m2"
-      vb.memory = 4096
+  (1..NUM_WORKER_NODES).each do |i|
+
+  config.vm.define "node0#{i}" do |node|
+    node.vm.hostname = "worker-node0#{i}"
+    node.vm.network "private_network", ip: IP_NW + "#{IP_START + i}"
+    node.vm.provider "virtualbox" do |vb|
+        vb.memory = 2048
+        vb.cpus = 1
     end
-    server.vm.hostname = "m2.aerospike.training"
-    server.vm.network :private_network, ip: "192.168.56.152"
+    #node.vm.provision "shell", path: "scripts/common.sh"
+    #node.vm.provision "shell", path: "scripts/node.sh"
   end
-end
+
+  end
+end 
