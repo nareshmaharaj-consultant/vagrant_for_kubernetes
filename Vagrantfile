@@ -18,6 +18,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "bento/ubuntu-22.04"
   config.vm.box_check_update = true
   config.vm.boot_timeout = 600
+  config.vm.provision "file", source: "setup-k8s.sh", destination: "setup-k8s.sh"
 
   config.vm.define "master" do |master|
     # master.vm.box = "bento/ubuntu-18.04"
