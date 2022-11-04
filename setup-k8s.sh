@@ -54,4 +54,3 @@ rm containerd-*
 rm runc.amd64*
 
 kubectl completion bash >> ~/.bashrc
-source ~/.bashrc
