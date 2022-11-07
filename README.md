@@ -6,7 +6,7 @@
 - Enable required ports for inter vm connectivity
 - creates a setup script to be run on all hosts to CRI, CNI, kubeadm kubectl, ..
 
- > Update the addresses used to be within the allowed range by adding the following to /etc/vbox/networks.conf
+ > If you are using a Mac you may wish to update the allowed address range by adding the following to /etc/vbox/networks.conf
 <BR>10.0.0.0/8 192.168.0.0/16
 <BR>2001::/64
 
