@@ -1,5 +1,6 @@
 cd ~
-VER=1.19.12
+#VER=1.21.13
+VER=1.24.3
 PWD=`pwd`
 IP_MASTER="10.0.0.10"
 IP=`hostname -i | awk '{print $2}'`
@@ -51,8 +52,8 @@ sudo apt-get install -y kubelet=${VER}-00 kubeadm=${VER}-00 kubectl=${VER}-00
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
 sudo systemctl restart containerd
 wget https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
-sudo apt-get install bash-completion
-sudo apt-get install jq
+sudo apt-get install bash-completion -y
+sudo apt-get install jq -y
 kubectl completion bash >> ~/.bashrc
 
 rm cni-plugins-linux-amd64*
@@ -70,14 +71,14 @@ then
   kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.2/manifests/custom-resources.yaml
   kubectl taint nodes --all node-role.kubernetes.io/control-plane-
   mkdir -p $HOME/.kube
-  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo cp -if  /etc/kubernetes/admin.conf $HOME/.kube/config
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
   echo "run the following command: [ watch kubectl get pods -n calico-system ]"
 fi
 
 # Lua
-curl -R -O http://www.lua.org/ftp/lua-5.4.4.tar.gz
-tar zxf lua-5.4.4.tar.gz
-cd lua-5.4.4
-make all test
-sudo make install
+#curl -R -O http://www.lua.org/ftp/lua-5.4.4.tar.gz
+#tar zxf lua-5.4.4.tar.gz
+#cd lua-5.4.4
+#make all test
+#sudo make install
