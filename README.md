@@ -13,4 +13,3 @@
  - _start.sh ( Create VMs )
  - ./setup-k8s.sh ( For the k8s cluster )
  - source ~/.bashrc ( auto complete )
- > 
