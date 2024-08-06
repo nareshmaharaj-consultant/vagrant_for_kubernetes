@@ -1,6 +1,6 @@
 # vagrant-for-kubeadm
 
-- Will create 4 nodes
+- Will create an Ubuntu Kubernets cluster.
 - Disable swap
 - add firewall rules
 - Enable required ports for inter vm connectivity
@@ -11,6 +11,8 @@
 <BR>2001::/64
 
  > run
- > <BR>sudo ./setup-k8s.sh
- > <BR>source ~/.bashrc
+ > _start.sh
+ > After the cluster has been formed then run the following on each node. After completion then use the kubeadm join commmands on thr worker nodes.
+   > <BR>./setup-k8s.sh
+   > <BR>source ~/.bashrc
  > 
