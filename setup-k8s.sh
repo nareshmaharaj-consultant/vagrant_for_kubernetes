@@ -1,9 +1,13 @@
 cd ~
-#VER=1.21.13
-VER=1.24.3
+VER=1.27
 PWD=`pwd`
-IP_MASTER="10.0.0.10"
 IP=`hostname -i | awk '{print $2}'`
+
+IP_MASTER=0.0.0.0
+if [[ `hostname -s` = "master-node" ]]; then
+        IP_MASTER=`hostname -i | awk '{print $2}'`
+	echo $IP_MASTER
+fi
 
 sudo modprobe br_netfilter
 
@@ -44,11 +48,14 @@ containerd config default | sudo tee -a /etc/containerd/config.toml
 sudo systemctl restart containerd
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl
-sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v${VER}/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+temp1='deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v'
+temp2=${VER}'/deb/ /'
+temp3=$temp1$temp2
+echo $temp3 | sudo tee /etc/apt/sources.list.d/kubernetes.list
 sudo apt-get update
-#sudo apt-get install -y kubelet=1.25.1-00 kubeadm=1.25.1-00 kubectl=1.25.1-00
-sudo apt-get install -y kubelet=${VER}-00 kubeadm=${VER}-00 kubectl=${VER}-00
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
 sudo systemctl restart containerd
 wget https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
@@ -71,14 +78,7 @@ then
   kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.2/manifests/custom-resources.yaml
   kubectl taint nodes --all node-role.kubernetes.io/control-plane-
   mkdir -p $HOME/.kube
-  sudo cp -if  /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo cp -f  /etc/kubernetes/admin.conf $HOME/.kube/config
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
   echo "run the following command: [ watch kubectl get pods -n calico-system ]"
 fi
-
-# Lua
-#curl -R -O http://www.lua.org/ftp/lua-5.4.4.tar.gz
-#tar zxf lua-5.4.4.tar.gz
-#cd lua-5.4.4
-#make all test
-#sudo make install

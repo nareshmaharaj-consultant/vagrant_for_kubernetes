@@ -1,4 +1,4 @@
-NUM_WORKER_NODES=3
+NUM_WORKER_NODES=5
 IP_NW="10.0.0."
 IP_START=10
 IP_NW_PUBLIC="192.168.0."
@@ -8,15 +8,20 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", env: {"IP_NW" => IP_NW, "IP_START" => IP_START}, inline: <<-SHELL
       apt-get update -y
       echo "$IP_NW$((IP_START)) master-node" >> /etc/hosts
-      echo "$IP_NW$((IP_START+1)) worker-node01" >> /etc/hosts
-      echo "$IP_NW$((IP_START+2)) worker-node02" >> /etc/hosts
-      echo "$IP_NW$((IP_START+3)) worker-node03" >> /etc/hosts
   SHELL
+ 
+  (1..NUM_WORKER_NODES).each do |i|
+    INTERNAL_IP = IP_NW + "#{IP_START + i}"
+    config.vm.provision "shell", env: {"IP_NW" => IP_NW, "IP_START" => IP_START}, inline: <<-SHELL
+      echo #{INTERNAL_IP} worker-node0#{i} >> /etc/hosts
+    SHELL
+  end
 
   config.vm.synced_folder "shared/", "/shared", create: true
   config.vm.synced_folder "data/", "/data", create: true
   config.vm.provision "shell", path: "swap.off.sh"
   config.vm.provision "shell", path: "add-fw-rules.sh"
+  #config.vm.provision "shell", path: "setup-k8s.sh"
   config.vm.box = "bento/ubuntu-22.04"
   config.vm.box_check_update = true
   config.vm.boot_timeout = 600
