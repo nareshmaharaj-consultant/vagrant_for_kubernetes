@@ -1,5 +1,5 @@
 start=`date +%s`
-vagrant up
+vagrant up | tee log.txt
 vagrant plugin install vagrant-hostmanager
 vagrant hostmanager
 end=`date +%s`
