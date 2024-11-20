@@ -48,8 +48,8 @@ Vagrant.configure("2") do |config|
     node.vm.network "private_network", ip: IP_NW + "#{IP_START + i}"
     node.vm.network "public_network", ip: IP_NW_PUBLIC + "#{IP_START_PUBLIC + i}", bridge: "en0: Wi-Fi"
     node.vm.provider "virtualbox" do |vb|
-        vb.memory = 2048
-        vb.cpus = 1
+        vb.memory = 7168
+        vb.cpus = 2
     end
     #node.vm.provision "shell", path: "scripts/common.sh"
     #node.vm.provision "shell", path: "scripts/node.sh"
