@@ -21,15 +21,16 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "data/", "/data", create: true
   config.vm.provision "shell", path: "swap.off.sh"
   config.vm.provision "shell", path: "add-fw-rules.sh"
-  #config.vm.provision "shell", path: "setup-k8s.sh"
   config.vm.box = "bento/ubuntu-22.04"
   config.vm.box_check_update = true
   config.vm.boot_timeout = 600
   config.vm.provision "file", source: "setup-k8s.sh", destination: "setup-k8s.sh"
+  config.vm.provision "shell", inline: <<-SHELL
+    chmod +x /home/vagrant/setup-k8s.sh
+  SHELL
   config.vm.network "public_network", bridge: "en0: Wi-Fi"
 
   config.vm.define "master" do |master|
-    # master.vm.box = "bento/ubuntu-18.04"
     master.vm.hostname = "master-node"
     master.vm.network "private_network", ip: IP_NW + "#{IP_START}"
     master.vm.network "public_network", ip: IP_NW_PUBLIC + "#{IP_START_PUBLIC}", bridge: "en0: Wi-Fi"
@@ -37,8 +38,6 @@ Vagrant.configure("2") do |config|
         vb.memory = 4048
         vb.cpus = 2
     end
-    #master.vm.provision "shell", path: "scripts/common.sh"
-    #master.vm.provision "shell", path: "scripts/master.sh"
   end
 
   (1..NUM_WORKER_NODES).each do |i|
@@ -51,8 +50,6 @@ Vagrant.configure("2") do |config|
         vb.memory = 7168
         vb.cpus = 2
     end
-    #node.vm.provision "shell", path: "scripts/common.sh"
-    #node.vm.provision "shell", path: "scripts/node.sh"
   end
 
   end

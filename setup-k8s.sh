@@ -2,11 +2,10 @@ cd ~
 VER=1.27
 PWD=`pwd`
 IP=`hostname -i | awk '{print $2}'`
-
 IP_MASTER=0.0.0.0
 if [[ `hostname -s` = "master-node" ]]; then
         IP_MASTER=`hostname -i | awk '{print $2}'`
-	echo $IP_MASTER
+        echo $IP_MASTER
 fi
 
 sudo modprobe br_netfilter
@@ -47,15 +46,20 @@ sudo mkdir -p /etc/containerd/
 containerd config default | sudo tee -a /etc/containerd/config.toml
 sudo systemctl restart containerd
 sudo apt-get update
-sudo apt-get install -y apt-transport-https ca-certificates curl
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v${VER}/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-temp1='deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v'
-temp2=${VER}'/deb/ /'
-temp3=$temp1$temp2
-echo $temp3 | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo rm -f /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get clean
+
+sudo apt-get update
+# apt-transport-https may be a dummy package; if so, you can skip that package
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+# This overwrites any existing configuration in /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
+
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
 sudo systemctl restart containerd
 wget https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
@@ -82,3 +86,4 @@ then
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
   echo "run the following command: [ watch kubectl get pods -n calico-system ]"
 fi
+
