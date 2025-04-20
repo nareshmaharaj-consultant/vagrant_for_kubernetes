@@ -13,4 +13,3 @@ end=${end:-0}
 # Now safe to do math
 runtime=$((end - start))
 echo "Time taken to complete: $runtime seconds"
-
