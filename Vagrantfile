@@ -27,6 +27,8 @@ Vagrant.configure("2") do |config|
   config.vm.provision "file", source: "setup-k8s.sh", destination: "setup-k8s.sh"
   config.vm.provision "shell", inline: <<-SHELL
     chmod +x /home/vagrant/setup-k8s.sh
+    sudo apt install dos2unix
+    dos2unix setup-k8s.sh
   SHELL
   config.vm.network "public_network", bridge: "en0: Wi-Fi"
 
