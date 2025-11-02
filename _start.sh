@@ -1,6 +1,10 @@
+export VAGRANT_DISABLE_STRICT_DEPENDENCY_ENFORCEMENT=1
+
 start=$(date +%s)
 
 vagrant up | tee log.txt
+vagrant plugin expunge --reinstall --force
+
 vagrant plugin install vagrant-hostmanager
 vagrant hostmanager
 
