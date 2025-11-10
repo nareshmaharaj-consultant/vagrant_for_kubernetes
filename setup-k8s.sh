@@ -88,3 +88,4 @@ then
   echo "run the following command: [ watch kubectl get pods -n calico-system ]"
 fi
 
+cp ~/.kube/config /shared/config
