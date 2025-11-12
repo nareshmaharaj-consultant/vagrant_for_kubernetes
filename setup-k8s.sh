@@ -72,6 +72,12 @@ rm cni-plugins-linux-amd64*
 rm containerd-*
 rm runc.amd64*
 
+# Set up accurate timeserver
+sudo apt-get install -y ntpdate
+sudo ntpdate -u pool.ntp.org
+sudo systemctl restart systemd-timesyncd
+sudo timedatectl set-ntp true
+
 # kubeadm on master only
 if [ $IP = $IP_MASTER ]
 then
@@ -84,8 +90,8 @@ then
   kubectl taint nodes --all node-role.kubernetes.io/control-plane-
   mkdir -p $HOME/.kube
   sudo cp -f  /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo cp -f  /etc/kubernetes/admin.conf /shared/config
+  echo -e sudo `kubeadm token create --print-join-command` > /shared/join_kubeadm_command.sh
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
   echo "run the following command: [ watch kubectl get pods -n calico-system ]"
 fi
-
-cp ~/.kube/config /shared/config
